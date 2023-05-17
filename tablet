@@ -1,0 +1,902 @@
+type: vertical-stack
+no_card: false
+cards:
+  - type: custom:stack-in-card
+    no_card: true
+    card_mod:
+      style: |
+        ha-card {
+          --ha-card-background: ;
+          font-family: monospace;
+          margin-top: 0px;
+        }
+    cards:
+      - type: custom:mushroom-title-card
+        title: |
+          {% set time = now().hour %}
+          {% if (time >= 18) %}
+          Boa noite!
+          {% elif (time >= 12) %}
+          Boa tarde!
+          {% elif (time >= 5) %}
+          Bom dia!
+          {% endif %}
+        alignment: center
+  - type: custom:mushroom-template-card
+    no_card: true
+    primary: '{{states(''sensor.time'')}}'
+    layout: vertical
+    card_mod:
+      style: |
+        ha-card {
+          --ha-card-background: ;
+          font-family: monospace;
+          --card-primary-font-size: 90px;
+          margin-top: -55px;
+        }
+        :host { 
+          --primary-text-color: white;
+        }
+  - type: custom:mushroom-template-card
+    no_card: true
+    primary: '{{states(''sensor.date_long'')}}'
+    layout: vertical
+    fill_container: true
+    card_mod:
+      style: |
+        ha-card {
+          --ha-card-background: none;
+          font-family: monospace;
+          --card-primary-font-size: 20px;
+          margin-top: -45px;
+        }
+        :host { 
+          --primary-text-color: white;
+        }
+  - show_current: true
+    show_forecast: false
+    type: weather-forecast
+    entity: weather.residencia_x
+    theme: ING Dark
+    fill_container: true
+    name: Previsão do tempo AccuWeather
+    no_card: true
+    card_mod:
+      style: |
+        ha-card {
+          font-family: monospace;
+          margin-top: 10px;
+          margin-left: auto;
+          margin-right: auto;
+          width: auto;
+        }
+  - show_current: false
+    show_forecast: true
+    fill_container: true
+    type: weather-forecast
+    entity: weather.forecast_residencia_x
+    theme: ING Dark
+    no_card: true
+    card_mod:
+      style: |
+        ha-card {
+          font-family: monospace;
+          margin-top: -25px;
+        }
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    cards:
+      - type: custom:mushroom-template-card
+        no_card: false
+        icon_color: purple
+        icon: mdi:menu
+        primary: null
+        layout: horizontal
+        multiline_secondary: false
+        fill_container: true
+        tap_action:
+          action: call-service
+          service: input_boolean.toggle
+          dates: {}
+          target:
+            entity_id: input_boolean.kiosk_tablet
+        card_mod:
+          style: |
+            ha-card {
+              font-family: monospace;
+              border-radius: 50px;
+            }
+      - type: custom:mushroom-template-card
+        no_card: false
+        primary: |-
+          {% set total = (states('sensor.luzes_on')) %}
+          {% if (states('sensor.luzes_on'))== '0' %}
+            Luzes OFF
+          {% elif (states('sensor.luzes_on'))== '1' %}
+          {{total}} Luz ON
+          {% elif (states('sensor.luzes_on'))> '1' %}
+          {{total}} Luzes ON
+          {% endif %}
+        icon: |-
+          {% set total = (states('sensor.luzes_on')) %}
+          {% if (states('sensor.luzes_on'))== '0' %}
+            mdi:lightbulb-multiple-off-outline
+          {% elif (states('sensor.luzes_on'))== '1' %}
+            mdi:lightbulb
+          {% elif (states('sensor.luzes_on'))> '1' %}
+            mdi:lightbulb-multiple
+          {% endif %}
+        icon_color: |-
+          {% set total = (states('sensor.luzes_on')) %}
+          {% if (states('sensor.luzes_on'))== '0' %}
+            green
+          {% elif (states('sensor.luzes_on'))== '1' %}
+            amber
+          {% elif (states('sensor.luzes_on'))<= '4' > '1' %}
+            amber
+          {% elif (states('sensor.luzes_on'))>= '5' %}
+            red
+          {% endif %}
+        layout: horizontal
+        multiline_secondary: false
+        fill_container: false
+        card_mod:
+          style: |
+            ha-card {
+              font-family: monospace;
+              border-radius: 50px;
+            }
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.popup
+            data:
+              content:
+                type: custom:mod-card
+                card_mod:
+                  style:
+                    tabbed-card $:
+                      mwc-tab:
+                        $:
+                          mwc-tab-indicator $: |
+                            .mdc-tab-indicator__content--underline {
+                              border-color: red !important;
+                              border-width: 3px !important;
+                            }
+                        .: |
+                          mwc-tab {
+                            background: var(--ha-card-background, var(--card-background-color, white) );
+                            border-color: var(--ha-card-border-color, var(--divider-color, #e0e0e0) );
+                            border-width: 1px;
+                            border-top-left-radius: 12px;
+                            border-top-right-radius: 12px;
+                            border-style: solid;
+                            overflow: hidden;
+                          }
+                          section article > * {
+                            --ha-card-border-radius: 0px 0px 12px 12px;
+                          }
+                card:
+                  type: custom:tabbed-card
+                  options: {}
+                  styles:
+                    '--mdc-theme-primary': orange
+                    '--mdc-tab-text-label-color-default': null
+                  tabs:
+                    - attributes:
+                        label: Ligadas
+                        icon: mdi:lightbulb-on
+                        isFadingIndicator: false
+                        minWidth: false
+                        isMinWidthIndicator: false
+                        stacked: false
+                      card:
+                        type: vertical-stack
+                        cards:
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000e54cc0
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000e54cc0
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000a83e89_1
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000a83e89_1
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: light.luz_pia
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: light.luz_pia
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000a83e89_2
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000a83e89_2
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000a8416f_1
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000a8416f_1
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: light.sonoff_1000dbd5d1
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: light.sonoff_1000dbd5d1
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000a8416f_2
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000a8416f_2
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_100094bd25_3
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_100094bd25_3
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: light.sonoff_1000d42ce5
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: light.sonoff_1000d42ce5
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000f9e81f
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000f9e81f
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000f95c15
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000f95c15
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000f97f7a
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000f97f7a
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000e4bc63
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000e4bc63
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000e5097b
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000e5097b
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: light.cabeceira
+                                state: 'on'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: light.cabeceira
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                    - attributes:
+                        label: Desligadas
+                        icon: mdi:lightbulb-off-outline
+                      card:
+                        type: vertical-stack
+                        cards:
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000e54cc0
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000e54cc0
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000a83e89_1
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000a83e89_1
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: light.luz_pia
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: light.luz_pia
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000a83e89_2
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000a83e89_2
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000a8416f_1
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000a8416f_1
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: light.sonoff_1000dbd5d1
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: light.sonoff_1000dbd5d1
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000a8416f_2
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000a8416f_2
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_100094bd25_3
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_100094bd25_3
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: light.sonoff_1000d42ce5
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: light.sonoff_1000d42ce5
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000f9e81f
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000f9e81f
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000f95c15
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000f95c15
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000f97f7a
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000f97f7a
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000e4bc63
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000e4bc63
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: switch.sonoff_1000e5097b
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: switch.sonoff_1000e5097b
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+                          - type: conditional
+                            conditions:
+                              - entity: light.cabeceira
+                                state: 'off'
+                            card:
+                              type: custom:mushroom-light-card
+                              card_mod:
+                                style: |
+                                  ha-card {
+                                    --ha-card-background: rgba(119,136,153, 0.1);
+                                    border: 0px;
+                                  }
+                              entity: light.cabeceira
+                              use_light_color: true
+                              show_brightness_control: true
+                              show_color_control: true
+                              show_color_temp_control: true
+                              layout: horizontal
+      - type: custom:mushroom-template-card
+        primary: |-
+          {% set total = (states('sensor.janelas_abertas')) %}
+          {% if (states('sensor.janelas_abertas'))== '0' %}
+          Fechado
+          {% elif (states('sensor.janelas_abertas'))== '1' %}
+          {{total}} Aberta
+          {% elif (states('sensor.janelas_abertas'))> '1' %}
+          {{total}} Abertas
+          {% endif %}
+        icon: |-
+          {% set total = (states('sensor.janelas_abertas')) %}
+          {% if (states('sensor.janelas_abertas'))== '0' %}
+            mdi:window-closed-variant
+          {% elif (states('sensor.janelas_abertas'))>= '1' %}
+            mdi:window-open-variant
+          {% endif %}
+        icon_color: |-
+          {% set total = (states('sensor.janelas_abertas')) %}
+          {% if (states('sensor.janelas_abertas'))== '0' %}
+            red
+          {% elif (states('sensor.janelas_abertas'))>= '1' %}
+            green
+          {% endif %}
+        layout: horizontal
+        multiline_secondary: false
+        fill_container: false
+        card_mod:
+          style: |
+            ha-card {
+              font-family: monospace;
+              border-radius: 50px;
+            }
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.popup
+            data:
+              content:
+                type: vertical-stack
+                cards:
+                  - type: custom:mushroom-title-card
+                    title: Sensores - Portas / Janelas
+                    alignment: center
+                    title_tap_action:
+                      action: none
+                    subtitle_tap_action:
+                      action: none
+                  - type: vertical-stack
+                    cards:
+                      - type: horizontal-stack
+                        cards:
+                          - type: custom:mushroom-template-card
+                            entity: binary_sensor.sonoff_a440017119
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  --ha-card-background: rgba(119,136,153, 0.1);
+                                  border: 0px;
+                                }                            
+                            primary: Porta Sacada
+                            secondary: >-
+                              {{ is_state("binary_sensor.sonoff_a440017119",
+                              "off") | iif("Fechado", "Aberto") }}
+                            icon: >-
+                              {{ is_state("binary_sensor.sonoff_a440017119",
+                              "off") | iif("mdi:door-closed", "mdi:door-open")
+                              }}
+                            layout: vertical
+                            icon_color: >-
+                              {{ is_state("binary_sensor.sonoff_a440017119",
+                              "off") | iif("red", "green") }}
+                          - type: custom:mushroom-template-card
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  --ha-card-background: rgba(119,136,153, 0.1);
+                                  border: 0px;
+                                }                            
+                            primary: Janela Suíte
+                            secondary: >-
+                              {{ is_state("binary_sensor.sonoff_a4400181a7",
+                              "off") | iif("Fechado", "Aberto") }}
+                            icon: >-
+                              {{ is_state("binary_sensor.sonoff_a4400181a7",
+                              "off") | iif("mdi:window-closed-variant",
+                              "mdi:window-open-variant") }}
+                            layout: vertical
+                            icon_color: >-
+                              {{ is_state("binary_sensor.sonoff_a4400181a7",
+                              "off") | iif("red", "green") }}
+                            entity: binary_sensor.sonoff_a4400181a7
+                          - type: custom:mushroom-template-card
+                            entity: binary_sensor.sonoff_a44000532a
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  --ha-card-background: rgba(119,136,153, 0.1);
+                                  border: 0px;
+                                }
+                            primary: Vidro Sacada
+                            secondary: >-
+                              {{ is_state("binary_sensor.sonoff_a44000532a",
+                              "off") | iif("Fechado", "Aberto") }}
+                            icon: >-
+                              {{ is_state("binary_sensor.sonoff_a44000532a",
+                              "off") | iif("mdi:door-closed", "mdi:door-open")
+                              }}
+                            layout: vertical
+                            icon_color: >-
+                              {{ is_state("binary_sensor.sonoff_a44000532a",
+                              "off") | iif("red", "green") }}
+                      - type: horizontal-stack
+                        cards:
+                          - type: custom:mushroom-template-card
+                            entity: binary_sensor.sonoff_a44001a839
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  --ha-card-background: rgba(119,136,153, 0.1);
+                                  border: 0px;
+                                }
+                            primary: Janela Lavanderia
+                            secondary: >-
+                              {{ is_state("binary_sensor.sonoff_a44001a839",
+                              "off") | iif("Fechado", "Aberto") }}
+                            icon: >-
+                              {{ is_state("binary_sensor.sonoff_a44001a839",
+                              "off") | iif("mdi:window-closed-variant",
+                              "mdi:window-open-variant") }}
+                            layout: vertical
+                            icon_color: >-
+                              {{ is_state("binary_sensor.sonoff_a44001a839",
+                              "off") | iif("red", "green") }}
+                          - type: custom:mushroom-template-card
+                            entity: binary_sensor.sonoff_a44001a83d
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  --ha-card-background: rgba(119,136,153, 0.1);
+                                  border: 0px;
+                                }
+                            primary: Janela Meninas
+                            secondary: >-
+                              {{ is_state("binary_sensor.sonoff_a44001a83d",
+                              "off") | iif("Fechado", "Aberto") }}
+                            icon: >-
+                              {{ is_state("binary_sensor.sonoff_a44001a83d",
+                              "off") | iif("mdi:window-closed-variant",
+                              "mdi:window-open-variant") }}
+                            layout: vertical
+                            icon_color: >-
+                              {{ is_state("binary_sensor.sonoff_a44001a83d",
+                              "off") | iif("red", "green") }}
+    layout:
+      grid-template-columns: 18% 41% 41%
+      grid-template-rows: auto
+      grid-template-areas: |
+        "kiosk info1 info2"
+view_layout:
+  grid-area: main
